@@ -98,132 +98,160 @@ int main()
 	cin >> m;
 
 	float* work;
-	 work= new float[m];
+	work = new float[m];
+	float* available;
+	available = new float[m];
 	float* safe;
-	 safe = new float[n];
-	 int** Need = new int* [n];
-	 for (int i = 0; i < n; ++i) {
-		 Need[i] = new int[m];
-	 }
-	 
-	 int** allocation = new int* [n];
-	 for (int i = 0; i < n; ++i) {
-		 allocation[i] = new int[m];
-	 }
+	safe = new float[n];
+	int** Need = new int* [n];
+	for (int i = 0; i < n; ++i) {
+		Need[i] = new int[m];
+	}
+
+	int** allocation = new int* [n];
+	for (int i = 0; i < n; ++i) {
+		allocation[i] = new int[m];
+	}
 	/* int** Need = new int* [n];
 	 for (int i = 0; i < n; ++i) {
 		 Need[i] = new int[m];
 	 }*/
-	 int** max = new int* [n];
-	 for (int i = 0; i < n; ++i) {
-		 max[i] = new int[m];
-	 }
+	int** max = new int* [n];
+	for (int i = 0; i < n; ++i) {
+		max[i] = new int[m];
+	}
 	// allocation = new float[n][m];
-	 bool* finish;
-	 finish = new bool[n];
-	 for(int i=0;i<n;i++)
-	 {
-		 finish[i] = false;
-	 }
+	bool* finish;
+	finish = new bool[n];
+	for (int i = 0; i < n; i++)
+	{
+		finish[i] = false;
+	}
+
+	cout << "enter available matrix" << endl;
+	for (int i = 0; i < m; i++)
+	{
+		cin >> work[i];
+		available[i] = work[i];
+	}
+	cout << "enter allocation matrix" << endl;
+
+	for (int i = 0; i < n; i++)
+	{
+		cout << "P" << i << ":";
+		for (int j = 0; j < m; j++)
+		{
+
+			cin >> allocation[i][j];
+
+		}
+
+	}
+	cout << "enter Max matrix" << endl;
+
+	for (int i = 0; i < n; i++)
+	{
+		cout << "P" << i << ":";
+		for (int j = 0; j < m; j++)
+		{
+
+			cin >> max[i][j];
+		}
+
+	}
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			Need[i][j] = max[i][j] - allocation[i][j];
+		}
+
+	}
+	cout << "Need matrix:" << endl;
+	for (int i = 0; i < n; i++)
+	{
+		cout << "P" << i << ":";
+		for (int j = 0; j < m; j++)
+		{
+			cout << Need[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	int prequest = 0;
+	int input;
+	while(1)
+	{
+	cout << "To use the Safety algorithm let input=1 ,but if you want to use the request algorithm let input=0" << endl << "input=";
+	cin >> input;
+	if (input == 1) {
+		for(int f = 0; f < m;f++)
+		{
+			work[f] = available[f];
+		} 
+		for (int i = 0; i < n; i++)
+		{
+			finish[i] = false;
+		}
+		issafe(work, finish, max, allocation, n, m, Need, input, prequest); 
+	}
+	else if (input == 0)
+	{
+		for (int f = 0; f < m; f++)
+		{
+			work[f] = available[f];
+		}
+		for (int i = 0; i < n; i++)
+		{
+			finish[i] = false;
+		}
+		//int prequest;
+		cout << "enter the process number who ask for request " << endl;
+		cin >> prequest;
+		int* req;
+		req = new int[m];
+		cout << "enter the request" << endl;
+		for (int i = 0; i < m; i++)
+		{
+			cin >> req[i];
+		}
+		int x = 0;
+		int y = 0;
+		for (int w = 0; w < m; w++)
+		{
+			if (req[w] <= Need[prequest][w])
+			{
+				x++;
+			}
+		}
+		for (int j = 0; j < m; j++)
+		{
+			if (req[j] <= work[j])
+			{
+				y++;
+			}
+		}
+		if (x == m && y == m)
+		{
+			for (int j = 0; j < m; j++)
+			{
+				work[j] = work[j] - req[j];
+				available[j] = work[j];
+				allocation[prequest][j] = allocation[prequest][j] + req[j];
+				Need[prequest][j] = Need[prequest][j] - req[j];
+			}
+			issafe(work, finish, max, allocation, n, m, Need, input, prequest);
+
+		}
+		else { cout << " No the request cant be granted"; }
+
+
+	}
+	else { cout << "Something went wrong make sure that the input= 1 or 0"; }
+	cout << endl;
 	
-	 cout << "enter available matrix" << endl;
-	 for (int i = 0; i < m; i++)
-	 {
-		 cin>>work[i];
-	 }
-	 cout << "enter allocation matrix"<<endl;
-	
-	 for (int i = 0; i < n; i++)
-	 {
-		 cout << "P" << i<<":";
-		 for (int j = 0; j < m; j++)
-		 {
-			
-			 cin >> allocation[i][j];
-
-		 }
-		 
-	 }
-	 cout << "enter Max matrix" << endl;
-
-	 for (int i = 0; i < n; i++)
-	 {
-		 cout << "P" << i<<":";
-		 for (int j = 0; j < m; j++)
-		 {
-			
-			 cin >> max[i][j];
-		 }
-		
-	 }
-	 for (int i = 0; i < n; i++)
-	 {
-		 for (int j = 0; j < m; j++)
-		 {
-			 Need[i][j] = max[i][j] - allocation[i][j];
-		 }
-
-	 }
-	 cout << "Need matrix:" << endl;
-	 for (int i = 0; i < n; i++)
-	 {
-		 cout << "P" << i << ":";
-		 for (int j = 0; j < m; j++)
-		 {
-			 cout << Need[i][j] << " ";
-		 }
-		 cout << endl;
-	 }
-	 cout << endl;
-	 int prequest=0;
-	 int input;
-	 cout << "To use the Safety algorithm let input=1 ,but if you want to use the request algorithm let input=0" << endl << "input=";
-	 cin >> input;
-	 if (input == 1) { issafe(work, finish, max, allocation, n, m, Need,input,prequest); }
-	 else if (input == 0)
-	 {
-		 //int prequest;
-		 cout << "enter the process number who ask for request " << endl;
-		 cin >> prequest;
-		 int* req;
-		 req = new int[m];
-		 cout << "enter the request" << endl;
-		 for (int i = 0; i < m; i++)
-		 {
-			 cin >> req[i];
-		 }
-		 int x = 0;
-		 int y = 0;
-		 for (int w = 0; w < m; w++)
-		 {
-			 if (req[w] <= Need[prequest][w])
-			 {
-				 x++;
-			 }
-		 }
-		 for (int j = 0; j < m; j++)
-		 {
-			 if (req[j] <= work[j])
-			 {
-				 y++;
-			 }
-		 }
-		 if (x == m && y == m)
-		 {
-			 for (int j = 0; j < m; j++)
-			 {
-				 work[j] = work[j] - req[j];
-				 allocation[prequest][j] = allocation[prequest][j] + req[j];
-				 Need[prequest][j] = Need[prequest][j] - req[j];
-			 }
-			 issafe(work, finish, max, allocation, n, m, Need,input,prequest);
-		 }
-		 else { cout << " No the request cant be granted"; }
-
-
-	 }
-	 else { cout << "Something went wrong make sure that the input= 1 or 0"; }
-	 system("pause");
+}
+	system("pause");
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
